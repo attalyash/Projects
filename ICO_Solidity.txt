@@ -1,0 +1,44 @@
+ pragma solidity ^0.4.11;
+ contract yashcoin_ico{
+    // Introducing th maximum number of yashcoins available for sale
+    uint public max_yashcoins = 1000000;
+    
+    // Introducing conversion rate from USD to yashcoins
+    uint public usd_to_yashcoins = 10000;
+    
+    // Introducing the total number of yashcoins that have been bought by the investers
+    uint public total_yashcoins_bought = 0;
+    
+    // Mapping from the invester address to its equity in yashcoin and USD
+    mapping(address => uint) equity_yashcoins;
+    mapping(address => uint) equity_usd;
+    
+    // Checking if an invester can buy yashcoins 
+    modifier can_buy_yashcoins(uint usd_invested) {
+        require (usd_invested * usd_to_yashcoins + total_yashcoins_bought <= max_yashcoins);
+        _;    
+    }
+    
+    // Getting the equity in yashcoins of an invester
+    function equity_in_yashcoins(address investor)external constant returns(uint){
+       return equity_yashcoins[investor];
+    }
+    // Getting the equity in usd of an invester
+    function equity_in_usd(address investor)external constant returns(uint){
+       return equity_usd[investor];
+    }
+    // Buying yashcoins
+    function buy_yashcoins(address investor, uint usd_invested)external
+    can_buy_yashcoins(usd_invested) {
+        uint yashcoins_bought = usd_invested * usd_to_yashcoins;
+        equity_yashcoins[investor] += yashcoins_bought;
+        equity_usd[investor] = usd_invested;
+        total_yashcoins_bought += yashcoins_bought;
+    }
+    // Selling yashcoins
+    function sell_yashcoins(address investor, uint yashcoins_sold)external {
+        equity_yashcoins[investor] -= yashcoins_sold;
+        equity_usd[investor] = equity_yashcoins[investor] / usd_to_yashcoins;
+        total_yashcoins_bought -= yashcoins_sold;
+    }
+ }
